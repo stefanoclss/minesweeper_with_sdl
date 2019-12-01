@@ -1,0 +1,2 @@
+all: help_functions.c  GUI.c 
+	gcc help_functions.c  GUI.c -lSDL2 -Wall -o  main -lm
