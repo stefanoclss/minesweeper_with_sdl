@@ -22,10 +22,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////										BACKEND FUNCTIONS																	///////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int find(int move_x ,int move_y)
+int find(int move_x ,int move_y , int vertical_cels)
 {
 
-	int offset_bytes = (move_x + (move_y * VERTICAL_CELS)) * sizeof(struct Cell);    //hulpfunctie voor het zoeken van een elemnt op de grid
+	int offset_bytes = (move_x + (move_y * vertical_cels )) * sizeof(struct Cell);    //hulpfunctie voor het zoeken van een elemnt op de grid
 	return offset_bytes;
 }
 
@@ -53,132 +53,102 @@ int find(int move_x ,int move_y)
         S.W--> South-West   (row+1, col-1)
 */      // mentioned in references!
 
-// void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zeroes)
-// {
-// 	if (bombs_or_zeroes == 1)    //check for bombs
-// 	{
-// 		int ctr = 0;
-// 		for (int i = x0 - 1 ; i < x0 + 2 ; i++)
-// 		{
-// 			for (int j = y0 - 1 ; j < y0 + 2 ; j++)
-// 			{
+void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zeroes , struct Constants info)
+{
+	//printf("\n do i check the suroundings???????");
+	if (bombs_or_zeroes == 1)    //check for bombs
+	{
+		int ctr = 0;
+		for (int i = x0 - 1 ; i < x0 + 2 ; i++)
+		{
+			for (int j = y0 - 1 ; j < y0 + 2 ; j++)
+			{
 
-// 				if (i < 0 || j < 0 || i > (HORIZONTAL_CELS - 1) || j > (VERTICAL_CELS - 1))
-// 				{
-// 					continue;
-// 				}
-// 				else if (*(ptr_field + find(i , j))->actual_value == 'B')         //look for all mines and increment ctr
-// 				{
-// 					ctr++;
-// 				}
+				if (i < 0 || j < 0 || i > (info.no_horizontal_cels - 1) || j > (info.no_vertical_cels - 1))
+				{
+					continue;
+				}
+				else if (*(ptr_field + find(i , j , info.no_vertical_cels))->actual_value == 'B')         //look for all mines and increment ctr
+				{
+					ctr++;
+				}
 
-// 			}
-// 		}
-// 		if (ctr == 0)
-// 		{
-// 			if (*(ptr_field + find(x0 , y0))->vissible_value == 'F')     // if vissible value is F don't hint the player
-// 			{
-// 				mine_checker(ptr_field , x0 , y0);
-// 			}
-// 			else
-// 			{
-// 			*(ptr_field + find(x0 , y0))->vissible_value = '0';         //if there are no adjecent mines change the values
-// 			*(ptr_field + find(x0 , y0))->actual_value = ' ';
-// 			mine_checker(ptr_field , x0 , y0);                          //call mine checker which wil recursivly call al adjecent spots
-// 			}
+			}
+		}
+		if (ctr == 0)
+		{
+			if (*(ptr_field + find(x0 , y0 , info.no_vertical_cels))->vissible_value == 'F')     // if vissible value is F don't hint the player
+			{
+				mine_checker(ptr_field , x0 , y0,info);
+			}
+			else
+			{
+			*(ptr_field + find(x0 , y0 , info.no_vertical_cels))->vissible_value = '0';         //if there are no adjecent mines change the values
+			*(ptr_field + find(x0 , y0 , info.no_vertical_cels))->actual_value = ' ';
+			mine_checker(ptr_field , x0 , y0 , info);                          //call mine checker which wil recursivly call al adjecent spots
+			}
 
-// 		}
-// 		else
-// 		{
-// 			char return_value = ctr + '0';                            //zet de value om naar een character
-// 			*(ptr_field + find(x0 , y0))->vissible_value = return_value;
-// 			*(ptr_field + find(x0 , y0))->actual_value = return_value;
-// 			 mine_checker(ptr_field , x0 , y0);                        // roep minechecker op (zal niet loopen)
-// 		}
+		}
+		else
+		{
+			char return_value = ctr + '0';                            //zet de value om naar een character
+			*(ptr_field + find(x0 , y0 , info.no_vertical_cels))->vissible_value = return_value;
+			*(ptr_field + find(x0 , y0 , info.no_vertical_cels))->actual_value = return_value;
+			 mine_checker(ptr_field , x0 , y0 , info);                        // roep minechecker op (zal niet loopen)
+		}
 
-// 	}
-// 	else
-// 	{
-// 		for (int i = x0 - 1 ; i < x0 + 2 ; i++)
-// 		{
-// 			for (int j = y0 - 1 ; j < y0 + 2 ; j++)
-// 			{
-// 				if (i == x0 && j == y0)                          //functie wordt opgeroepen indien een spot 0 heeft,
-// 					                                             //markeer de actuele value als gecontroleerd om eeuwige loopen te vermijden
-// 				{
-// 					*(ptr_field + find(i , j))->actual_value = ' ';
-// 				}
-// 				else if (i < 0 || j < 0 || i > (HORIZONTAL_CELS - 1) || j > (VERTICAL_CELS - 1))     //ga niet zoeken buiten de array
-// 				{
-// 					continue;
-// 				}
-// 				else if (*(ptr_field + find(i , j))->vissible_value == 'F' ||*(ptr_field + find(i , j))->vissible_value == '0' || *(ptr_field + find(i , j))->actual_value == 'B')
-// 				{
-// 					continue;      //skip als dit een bom/vlag of 0 is
-// 				}
-// 				else
-// 				{
-// 					check_suroundings(ptr_field , i , j , 1);   //kijk naar bommen voor
-// 				}
+	}
+	else
+	{
+		for (int i = x0 - 1 ; i < x0 + 2 ; i++)
+		{
+			for (int j = y0 - 1 ; j < y0 + 2 ; j++)
+			{
+				if (i == x0 && j == y0)                          //functie wordt opgeroepen indien een spot 0 heeft,
+					                                             //markeer de actuele value als gecontroleerd om eeuwige loopen te vermijden
+				{
+					*(ptr_field + find(i , j , info.no_vertical_cels))->actual_value = ' ';
+				}
+				else if (i < 0 || j < 0 || i > (info.no_horizontal_cels - 1) || j > (info.no_vertical_cels - 1))     //ga niet zoeken buiten de array
+				{
+					continue;
+				}
+				else if (*(ptr_field + find(i , j , info.no_vertical_cels))->vissible_value == 'F' ||*(ptr_field + find(i , j , info.no_vertical_cels))->vissible_value == '0' || *(ptr_field + find(i , j , info.no_vertical_cels))->actual_value == 'B')
+				{
+					continue;      //skip als dit een bom/vlag of 0 is
+				}
+				else
+				{
+					check_suroundings(ptr_field , i , j , 1 , info);   //kijk naar bommen voor
+				}
 
-// 			}
-// 		}
-// 	}
-// }
-
-
-
-// void mine_checker(struct Cell *ptr_field , int move_x, int move_y)
-// {
-
-// 	if (*(ptr_field + find(move_x , move_y))->vissible_value == 'q' && !(*(ptr_field + find(move_x , move_y))->actual_value == 'B'))   //indien we niet weten wat er zich op de positie bevind en dit geen bom is dan
-// 	{
-// 		check_suroundings(ptr_field , move_x , move_y , 1);                           //dan kijken we hoeveel mijnen er rondom het element zitten
-// 	}
-// 	else if(*(ptr_field + find(move_x , move_y))->vissible_value == '0')
-// 	{
-// 		check_suroundings(ptr_field , move_x , move_y , 0);                           //kijk naar omliggende spots
-// 	}
-// }
-
-// void update_field(struct Cell *ptr_field, int move_x, int move_y)
-// {
-// 	if (*(ptr_field + find(move_x , move_y))->actual_value == 'B')    //indien onze move op de plek van een bom is dan hebben we verloren
-// 	{
-// 				printf("you lost lost, play again Y/N");              //keuze om spel te stoppen,herstarten indien men verloren
-// 				char action;
-// 				scanf("%c", &action);
-// 				if (action == 'Y')									//BELANGRIJK: geen switch case gebruikt vanwege het klagen van het initialiseren van nieuwe parameters \n
-// 				{													//x en y in deze potentiele switch case statement (mogelijk makkelijke oplossing)
-// 					print_grid(ptr_field, 1);
-// 					int x , y;
-// 					printf("\n choose an x coordinate \n");        //mogelijk efficientere oplossing (geen code duplictatie) d.m.v Reveal,Print en Flag in een
-// 																   //een abstractie te schrijven (vanwege enkel 4 keer bij Reveal niet gedaan) indien dit vaker gebeurt in toekomstige
-// 					scanf("%d"  , &x);							   //versies van het programma zal hier een abstractie voor komen
-// 					printf("\n choose an y coordinate \n");
-// 					scanf("%d"  , &y);
-// 					place_mines(x , y , ptr_field);               //herinitialisatie van het start veld
-// 				}
-// 				else if(action == 'N')							 //jump uit de loop
-// 				{
-// 					printf("\n bye bye");
-// 				}
-// 				else
-// 				{
-// 					printf("\n write correctly");					//handler voor foutieve waarden te negeren, kan ook gedaan worden voor x en y( niet gedaan vanwege mogelijke irrelevantie bij de toekomstige GUI)
-// 					update_field(ptr_field , move_x , move_y);		//door het printen van het veld overshoot de scanf zich soms (nog niet opgelost) mogelijk
-// 				}													//op te lossen dmv lege getchars te plaatsen voor scanf
-
-// 	}
-// 	else
-// 	{
-// 		mine_checker(ptr_field, move_x , move_y);                   //check hoeveel mijnen er rondom de gedane move zitten
-// 		print_grid(ptr_field, 0);									//print het grid
-// 		make_move(ptr_field);										//functie voor actie volgende zet te bepalen
+			}
+		}
+	}
+}
 
 
-// 	}
-// }
+
+void mine_checker(struct Cell *ptr_field , int move_x, int move_y , struct Constants info)
+{
+
+	if (*(ptr_field + find(move_x , move_y , info.no_vertical_cels))->vissible_value == 'q' && !(*(ptr_field + find(move_x , move_y , info.no_vertical_cels))->actual_value == 'B'))   //indien we niet weten wat er zich op de positie bevind en dit geen bom is dan
+	{
+		check_suroundings(ptr_field , move_x , move_y , 1 , info);                           //dan kijken we hoeveel mijnen er rondom het element zitten
+		printf("\nwe got here");
+		printf("\nwe got here3");
+	}
+	else if(*(ptr_field +  find(move_x , move_y , info.no_vertical_cels))->vissible_value == '0')
+	{
+		check_suroundings(ptr_field , move_x , move_y , 0 , info);                           //kijk naar omliggende spots
+		printf("\nwe got here2");
+		printf("\nwe got here3");
+
+	}
+
+}
+
+
 
 // int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act) //telt het aantal elementen van iets
 // {
@@ -189,21 +159,21 @@ int find(int move_x ,int move_y)
 // 		{
 // 			if (vis_or_act == 1)          //telt elementen van el en vergelijkt deze met de visuele value
 // 			{
-// 				if (el == *(ptr_field + find(i , j))->vissible_value)
+// 				if (el == *(ptr_field + find(i , j , info.no_vertical_cels))->vissible_value)
 // 				{
 // 					ctr++;
 // 				}
 // 			}
 // 			else if (vis_or_act == 2)     //teller voor te kijken of alle vlaggen op alle bommen staan
 // 			{
-// 				if (el == *(ptr_field + find(i , j))->vissible_value && *(ptr_field + find(i , j))->actual_value == 'B')
+// 				if (el == *(ptr_field + find(i , j , info.no_vertical_cels))->vissible_value && *(ptr_field + find(i , j , info.no_vertical_cels))->actual_value == 'B')
 // 				{
 // 					ctr++;
 // 				}
 // 			}
 // 			else       					//telt elementen van de actuele value
 // 			{
-// 				if (el == *(ptr_field + find(i , j))->actual_value)
+// 				if (el == *(ptr_field + find(i , j , info.no_vertical_cels))->actual_value)
 // 				{
 // 					ctr++;
 // 				}
@@ -374,49 +344,56 @@ int find(int move_x ,int move_y)
 
 
 
-//  void place_mines(int first_move_x, int first_move_y, struct Cell *ptr_field)
-// {
-// 	int i = 0;
-// 	while (i != TOTAL_BOMBS)
-// 	{
-// 		int random_x = rand() % (HORIZONTAL_CELS);   //mentioned in references
-// 		int random_y = rand() % (VERTICAL_CELS);
-// 		if ((random_x == first_move_x  || random_x == first_move_x + 1 || random_x == first_move_x - 1) &&
-// 			(random_y == first_move_y || random_y == first_move_y - 1 || random_y == first_move_y + 1 ))     //if test voor mijnen rondom eerste zet de vermijden
-// 		{
-// 			continue;
-// 		}
-// 		else if (*(ptr_field + find(random_x , random_y))->actual_value == 'B')    //we willen niet 2 bommen op dezelfde plek plaatsten(wat zou resulteren in minder bommen dan total BOMBS)
-// 		{
-// 			continue;
-// 		}
-// 		else
-// 		{
-// 			*(ptr_field + find(random_x , random_y))->actual_value = 'B';        //de actuele value van een BOM is B
-// 			*(ptr_field + find(random_x , random_y))->vissible_value = 'q'; 	 //de visuele value is q we willen vermits dat de bommen niet zichtbaar zijn voor ons
-// 			i++;
-// 		}
-// 	}
-// 	update_field(ptr_field , first_move_x , first_move_y);                      //we moeten na het plaatsen van de bom nog het veld updaten met de juiste cijfers
-// }
+ void place_mines(int first_move_x, int first_move_y, struct Cell *ptr_field , struct Constants info)
+{
+	int i = 0;
+	int upper_bound_x = info.no_horizontal_cels ;
+	int upper_bound_y = info.no_vertical_cels ; 
+	while (i != info.no_Bombs)
+	
+	{
+		int random_x = rand() % (upper_bound_x);   //mentioned in references
+		int random_y = rand() % (upper_bound_y);
+		if ((random_x == first_move_x  || random_x == first_move_x + 1 || random_x == first_move_x - 1) &&
+			(random_y == first_move_y || random_y == first_move_y - 1 || random_y == first_move_y + 1 ))     //if test voor mijnen rondom eerste zet de vermijden
+		{
+
+			continue;
+		}
+		else if (*(ptr_field + find(random_x , random_y , info.no_vertical_cels))->actual_value == 'B')    //we willen niet 2 bommen op dezelfde plek plaatsten(wat zou resulteren in minder bommen dan total BOMBS)
+		{
+			continue;
+		}
+		else
+		{
+			*(ptr_field + find(random_x , random_y , info.no_vertical_cels))->actual_value = 'B';        //de actuele value van een BOM is B
+			i++;
+		}
+	}
+	printf("\n finishedddddddddddddd");
+}
+
 //HULPFUNCTIES 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////										FRONTEND FUNCTIONS																	///////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void print_grid_frontend(struct Cell *ptr_field , struct Constants info , char action)
+void print_grid_frontend(struct Cell *ptr_field , struct Constants *info , char action)
 {
-	printf("\n do you pass here(before switch case)?");
-	for (int i=0; i < info.no_vertical_cels; i++)
+
+	for (int i=0; i < info->no_vertical_cels; i++)
 	{
-		for (int j=0; j < info.no_horizontal_cels ; j++)
+		for (int j=0; j < info->no_horizontal_cels ; j++)
 		{
+			int vertical_cels = info->no_vertical_cels;
 			switch (action)
 			{
 			case '0':   //making of start grid
-				*(ptr_field + find(i, j))->vissible_value = 'q';				//generate new_field
-				*(ptr_field + find(i, j))->actual_value = 'q';
+
+				*(ptr_field + find(i, j , vertical_cels))->vissible_value = 'q';				//generate new_field
+				*(ptr_field + find(i, j , vertical_cels))->actual_value = 'q';
 				break;
 			case '1':  //making of normal grid
+				//printf("%c" , *(ptr_field + find(i, j , vertical_cels))->vissible_value);
 				break;
 
 			case '2':  //making of cheat grid
@@ -426,3 +403,7 @@ void print_grid_frontend(struct Cell *ptr_field , struct Constants info , char a
 		}
 	}
 }
+
+
+
+
