@@ -5,9 +5,6 @@
 #include <time.h>
 #include <stddef.h>
 #include <SDL2/SDL.h>
-#define HORIZONTAL_CELS 10
-#define VERTICAL_CELS 10
-#define TOTAL_BOMBS 20
 static SDL_Renderer *renderer;
 static SDL_Texture *digit_0_texture;
 static SDL_Texture *digit_1_texture;
@@ -28,24 +25,23 @@ struct Cell
 };
 
 struct Constants 
-{       //can surely be lower
+{   
    int  no_horizontal_cels;
    int  no_vertical_cels;
    int  no_Bombs;
+   int  bombs_set;
 };
-int find(int move_x ,int move_y);
-void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zeroes);
-void update_field(struct Cell *ptr_field, int move_x, int move_y);
-void mine_checker(struct Cell *ptr_field , int move_x, int move_y);
+void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zeroes , struct Constants info);
+void print_grid_frontend(struct Cell *ptr_field , struct Constants *info , char action);
+void mine_checker(struct Cell *ptr_field , int move_x, int move_y , struct Constants info);
+int find(int move_x ,int move_y , int vertical_cels);
 int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act);
 void make_move(struct Cell *ptr_field);
 void print_grid(struct Cell *ptr_field , int actual) ;
-void place_mines(int first_move_x, int first_move_y, struct Cell *ptr_field);
-
+void place_mines(int first_move_x, int first_move_y, struct Cell *ptr_field , struct Constants info);
+void update_field(struct Cell *ptr_field, int move_x, int move_y , struct Constants *info);
 //HULPFUNCTIES 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////										FRONTEND FUNCTIONS																	///////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void print_grid_frontend(struct Cell *ptr_field , struct Constants info , char action);
-
 #endif
