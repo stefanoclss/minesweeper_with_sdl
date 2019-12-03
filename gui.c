@@ -25,6 +25,7 @@ static SDL_Texture *digit_7_texture;
 static SDL_Texture *digit_8_texture;
 static SDL_Texture *digit_C_texture;
 static SDL_Texture *digit_F_texture;
+static SDL_Texture *digit_B_texture;
 
 
 /*
@@ -54,7 +55,8 @@ static SDL_Window *window;
  * nog afwerken. Je mag natuurlijk alles aanpassen aan deze functie, inclusies return-type en argumenten.
  */
 
-void read_input() {
+void read_input(struct Cell *ptr_field , struct Constants *info) 
+{
 	SDL_Event event;
 
 	/*
@@ -68,9 +70,13 @@ void read_input() {
 	 *
 	 * Zie ook https://wiki.libsdl.org/SDL_PollEvent en http://www.parallelrealities.co.uk/2011_09_01_archive.html
 	 */
-	while (! SDL_PollEvent(&event)) {}
+	while (! (SDL_PollEvent(&event) && is_relevant_event(&event)))
+	 {
 
-	switch (event.type) {
+	 }
+
+	switch (event.type) 
+	{
 	case SDL_QUIT:
 		/* De gebruiker heeft op het kruisje van het venster geklikt om de applicatie te stoppen. */
 		should_continue = 0;
@@ -83,32 +89,110 @@ void read_input() {
 		 */
 		mouse_x = event.button.x;
 		mouse_y = event.button.y;
-		break;
+		int place_x = 0;
+		int place_y = 0;
+		for (int i = 0 ; i < info->no_horizontal_cels ; i++)
+		{
+			if (i * IMAGE_WIDTH > mouse_x)
+			{
+				break;
+			}
+			else
+			{
+				place_x = place_x + 1;
+			}
+		}
+		for (int j = 0 ; j < info->no_vertical_cels ; j++)
+		{
+			if (j * IMAGE_WIDTH > mouse_y)
+			{
+				break;
+			}
+			else
+			{
+				place_y = place_y + 1;
+			}
+		}
+		//printf("\n this is the bombset %d" , info->bombs_set);
+		printf("\n mouse_x : %d \t mouse_y : %d" , place_x  , place_y);
+		if (info->bombs_set == 0 && mouse_x  != 0 && mouse_y != 0)
+		{
+			place_mines(place_x - 1, place_y - 1, ptr_field , *info);
+			printf("hopefully you have updated correctly");
+			mine_checker(ptr_field ,place_x - 1, place_y - 1 , *info);
+			info->bombs_set = 1;
+			break;
+		}
+	
 	}
+
 }
 
-void draw_window(struct Cell *ptr_field , struct Constants info) 
+void draw_window(struct Cell *ptr_field , struct Constants *info) 
 {
 
 	SDL_RenderClear(renderer);
 	int x_pos , y_pos;
-	printf("\n do you pass here(before switch case)?");
-	for (int i=0; i < info.no_vertical_cels; i++)
+	for (int i=0; i < info->no_vertical_cels; i++)
 	{
-		for (int j=0; j < info.no_horizontal_cels ; j++)
+		for (int j=0; j < info->no_horizontal_cels ; j++)
 		{
 			x_pos = j * IMAGE_WIDTH;
 			y_pos = i * IMAGE_HEIGHT;
-			if (*(ptr_field + find(i, j))->vissible_value == 'q')
-			{
+			char value = *(ptr_field + find(i , j , info->no_vertical_cels))->vissible_value;
+			SDL_Rect rectangle = {x_pos , y_pos, IMAGE_WIDTH, IMAGE_HEIGHT };
 
-				SDL_Rect rectangle = {x_pos , y_pos, IMAGE_WIDTH, IMAGE_HEIGHT };
-				SDL_RenderCopy(renderer, digit_C_texture, NULL, &rectangle);
-			}
-			else
+			switch (value)
 			{
-				continue;
+			case 'q':
+				SDL_RenderCopy(renderer, digit_C_texture, NULL, &rectangle);
+				break;
+
+			case '0':
+				SDL_RenderCopy(renderer, digit_0_texture, NULL, &rectangle);
+				break;
+
+			case '1':
+				SDL_RenderCopy(renderer, digit_1_texture, NULL, &rectangle);
+				break;
+
+			case '2':
+				SDL_RenderCopy(renderer, digit_2_texture, NULL, &rectangle);
+				break;
+
+			case '3':
+				SDL_RenderCopy(renderer, digit_3_texture, NULL, &rectangle);
+				break;
+
+			case '4':
+				SDL_RenderCopy(renderer, digit_4_texture, NULL, &rectangle);
+				break;
+
+			case '5':
+				SDL_RenderCopy(renderer, digit_5_texture, NULL, &rectangle);
+				break;
+
+			case '6':
+				SDL_RenderCopy(renderer, digit_6_texture, NULL, &rectangle);
+				break;
+
+			case '7':
+				SDL_RenderCopy(renderer, digit_7_texture, NULL, &rectangle);
+				break;
+
+			case '8':
+				SDL_RenderCopy(renderer, digit_8_texture, NULL, &rectangle);
+				break;
+
+			case 'F':
+				SDL_RenderCopy(renderer, digit_F_texture, NULL, &rectangle);
+				break;
+			
+			default:
+				printf("\n hidden value %c" , *(ptr_field + find(j , i , info->no_vertical_cels))->vissible_value);
+				break;
 			}
+
 		}
 	}
 
@@ -143,22 +227,34 @@ void initialize_window(const char *title) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
 
+int is_relevant_event(SDL_Event *event) 
+{
+      if (event == NULL) 
+	  {
+          return 0;
+      }
+	return (event->type == SDL_MOUSEBUTTONDOWN) || (event->type == SDL_QUIT);
+}
+
 /*
  * Dealloceert alle SDL structuren die geïnitialiseerd werden.
  */
-void free_gui() {
+void free_gui() 
+{
 	/* Dealloceert de SDL_Textures die werden aangemaakt. */ //use fopen  for this stuff
-	// SDL_DestroyTexture(digit_F_texture);
-	 SDL_DestroyTexture(digit_C_texture);
-	// SDL_DestroyTexture(digit_0_texture);
-	//SDL_DestroyTexture(digit_1_texture);
-	// SDL_DestroyTexture(digit_2_texture);
-	// SDL_DestroyTexture(digit_3_texture);
-	// SDL_DestroyTexture(digit_4_texture);
-	// SDL_DestroyTexture(digit_5_texture);
-	// SDL_DestroyTexture(digit_6_texture);
-	// SDL_DestroyTexture(digit_7_texture);
-	// SDL_DestroyTexture(digit_8_texture);
+
+	SDL_DestroyTexture(digit_F_texture);
+	SDL_DestroyTexture(digit_C_texture);
+	SDL_DestroyTexture(digit_B_texture);
+	SDL_DestroyTexture(digit_0_texture);
+	SDL_DestroyTexture(digit_1_texture);
+	SDL_DestroyTexture(digit_2_texture);
+	SDL_DestroyTexture(digit_3_texture);
+	SDL_DestroyTexture(digit_4_texture);
+	SDL_DestroyTexture(digit_5_texture);
+	SDL_DestroyTexture(digit_6_texture);
+	SDL_DestroyTexture(digit_7_texture);
+	SDL_DestroyTexture(digit_8_texture);
 	/* Dealloceert het venster. */
 	SDL_DestroyWindow(window);
 	/* Dealloceert de renderer. */
@@ -175,21 +271,42 @@ void free_gui() {
 
 void initialize_textures() 
 {
-	// SDL_Surface* digit_1_texture_path = SDL_LoadBMP("Images/1.bmp");
-	// SDL_Surface* digit_0_texture_path = SDL_LoadBMP("Images/0.bmp");
-	// SDL_Surface* digit_2_texture_path = SDL_LoadBMP("Images/2.bmp");
-	// SDL_Surface* digit_3_texture_path = SDL_LoadBMP("Images/3.bmp");
-	// SDL_Surface* digit_4_texture_path = SDL_LoadBMP("Images/4.bmp");
-	// SDL_Surface* digit_5_texture_path = SDL_LoadBMP("Images/5.bmp");
-	// SDL_Surface* digit_6_texture_path = SDL_LoadBMP("Images/6.bmp");
-	// SDL_Surface* digit_7_texture_path = SDL_LoadBMP("Images/7.bmp");
-	// SDL_Surface* digit_8_texture_path = SDL_LoadBMP("Images/8.bmp");
-	// SDL_Surface* digit_F_texture_path = SDL_LoadBMP("Images/flagged.bmp");
+	SDL_Surface* digit_1_texture_path = SDL_LoadBMP("Images/1.bmp");
+	SDL_Surface* digit_0_texture_path = SDL_LoadBMP("Images/0.bmp");
+	SDL_Surface* digit_2_texture_path = SDL_LoadBMP("Images/2.bmp");
+	SDL_Surface* digit_3_texture_path = SDL_LoadBMP("Images/3.bmp");
+	SDL_Surface* digit_4_texture_path = SDL_LoadBMP("Images/4.bmp");
+	SDL_Surface* digit_5_texture_path = SDL_LoadBMP("Images/5.bmp");
+	SDL_Surface* digit_6_texture_path = SDL_LoadBMP("Images/6.bmp");
+	SDL_Surface* digit_7_texture_path = SDL_LoadBMP("Images/7.bmp");
+	SDL_Surface* digit_8_texture_path = SDL_LoadBMP("Images/8.bmp");
+	SDL_Surface* digit_F_texture_path = SDL_LoadBMP("Images/flagged.bmp");
 	SDL_Surface* digit_C_texture_path = SDL_LoadBMP("Images/covered.bmp");
-	
+	SDL_Surface* digit_B_texture_path = SDL_LoadBMP("Images/BOMB.bmp");
 	digit_C_texture = SDL_CreateTextureFromSurface(renderer, digit_C_texture_path);
-	
+	digit_B_texture = SDL_CreateTextureFromSurface(renderer, digit_B_texture_path);
+	digit_F_texture = SDL_CreateTextureFromSurface(renderer, digit_F_texture_path);
+	digit_0_texture = SDL_CreateTextureFromSurface(renderer, digit_0_texture_path);
+	digit_1_texture = SDL_CreateTextureFromSurface(renderer, digit_1_texture_path);
+	digit_2_texture = SDL_CreateTextureFromSurface(renderer, digit_2_texture_path);
+	digit_3_texture = SDL_CreateTextureFromSurface(renderer, digit_3_texture_path);
+	digit_4_texture = SDL_CreateTextureFromSurface(renderer, digit_4_texture_path);
+	digit_5_texture = SDL_CreateTextureFromSurface(renderer, digit_5_texture_path);
+	digit_6_texture = SDL_CreateTextureFromSurface(renderer, digit_6_texture_path);
+	digit_7_texture = SDL_CreateTextureFromSurface(renderer, digit_7_texture_path);
+	digit_8_texture = SDL_CreateTextureFromSurface(renderer, digit_8_texture_path);
+	SDL_FreeSurface(digit_B_texture_path);
 	SDL_FreeSurface(digit_C_texture_path);
+	SDL_FreeSurface(digit_F_texture_path);
+	SDL_FreeSurface(digit_0_texture_path);
+	SDL_FreeSurface(digit_1_texture_path);
+	SDL_FreeSurface(digit_2_texture_path);
+	SDL_FreeSurface(digit_3_texture_path);
+	SDL_FreeSurface(digit_4_texture_path);
+	SDL_FreeSurface(digit_5_texture_path);
+	SDL_FreeSurface(digit_6_texture_path);
+	SDL_FreeSurface(digit_7_texture_path);
+	SDL_FreeSurface(digit_8_texture_path);
 	
 }
 
@@ -197,7 +314,7 @@ void initialize_textures()
  * Initialiseert onder het venster waarin het speelveld getoond zal worden, en de texture van de afbeelding die getoond zal worden.
  * Deze functie moet aangeroepen worden aan het begin van het spel, vooraleer je de spelwereld begint te tekenen.
  */
-void initialize_gui(struct Cell *ptr_field , struct Constants info) 
+void initialize_gui(struct Cell *ptr_field , struct Constants *info) 
 {
 	initialize_window("Minesweeper");
 	initialize_textures();
@@ -206,6 +323,7 @@ void initialize_gui(struct Cell *ptr_field , struct Constants info)
 
 int main(int argc, char *argv[]) 
 {
+	srand(time(NULL));  
 	if( argc == 0 ) 
 	{
       printf("No arguments given which were expected.\n");
@@ -229,7 +347,7 @@ int main(int argc, char *argv[])
 					case 'w':
 						length_number = string_length(*(argv + 1));
 						WIDTH_FIELD = string_to_number(*(argv + 1) , length_number);
-						printf("\n this is the width of the field: %d", WIDTH_FIELD);
+						//printf("\n this is the width of the field: %d", WIDTH_FIELD);
 						parameters_checked++;
 						if (parameters_checked == 3)                         //make this generic occurs 3 times
 						{
@@ -244,7 +362,7 @@ int main(int argc, char *argv[])
 					case 'h':
 						length_number = string_length(*(argv + 1));
 						HEIGHT_FIELD = string_to_number(*(argv + 1) , length_number);
-						printf("\n this is the height of the field: %d", HEIGHT_FIELD);
+						//printf("\n this is the height of the field: %d", HEIGHT_FIELD);
 						parameters_checked++;
 						if (parameters_checked == 3)
 						{
@@ -259,7 +377,7 @@ int main(int argc, char *argv[])
 					case 'm':
 						length_number = string_length(*(argv + 1));
 						AMOUNT_OF_BOMBS = string_to_number(*(argv + 1) , length_number);
-						printf("\n these are the amount of bombs on the field: %d", AMOUNT_OF_BOMBS);
+						//printf("\n these are the amount of bombs on the field: %d", AMOUNT_OF_BOMBS);
 						parameters_checked++;
 						if (parameters_checked == 3)
 						{
@@ -288,19 +406,24 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			struct Constants field_info;
-			field_info.no_horizontal_cels = HEIGHT_FIELD;
-			field_info.no_vertical_cels = WIDTH_FIELD;
-			field_info.no_Bombs = AMOUNT_OF_BOMBS;
-			struct Cell field[HEIGHT_FIELD][WIDTH_FIELD];
-			initialize_gui(&field , field_info);
+			struct Constants *field_info;
+			field_info = (struct Constants *)malloc(sizeof(struct Constants));
+			field_info->no_horizontal_cels = WIDTH_FIELD ;
+			field_info->no_vertical_cels = HEIGHT_FIELD ;
+			field_info->no_Bombs = AMOUNT_OF_BOMBS;
+			field_info->bombs_set = 0;
+			struct Cell *field;
+			field = (struct Cell *)malloc((HEIGHT_FIELD * WIDTH_FIELD) * sizeof(struct Cell));
+			initialize_gui(field , field_info);
 			while (should_continue) 
 			{
-				 draw_window(&field , field_info);
-				 read_input();
+				 draw_window(field , field_info);
+				 read_input(field , field_info);
 			} 
 			/* Dealloceer al het geheugen dat werd aangemaakt door SDL zelf. */
 			free_gui();
+			free(field_info);
+			free(field);
 			return 0;
 		}
 		
