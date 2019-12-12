@@ -31,9 +31,9 @@ struct Constants
    int  no_Bombs;
    int  bombs_set;
 };
-void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zeroes , struct Constants info);
+void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zeroes , int width_field , int height_field);
+void mine_checker(struct Cell *ptr_field , int move_x, int move_y , int width_field , int height_field);
 void print_grid_frontend(struct Cell *ptr_field , struct Constants *info , char action);
-void mine_checker(struct Cell *ptr_field , int move_x, int move_y , struct Constants info);
 int find(int move_x ,int move_y , int vertical_cels);
 int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act);
 void make_move(struct Cell *ptr_field);
