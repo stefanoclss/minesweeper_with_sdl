@@ -72,7 +72,7 @@ void read_input(struct Cell *ptr_field , struct Constants *info)
 	 */
 	while (! (SDL_PollEvent(&event) && is_relevant_event(&event)))
 	 {
-
+		 //printf("\n skippinggggg");
 	 }
 
 	switch (event.type) 
@@ -108,6 +108,7 @@ void read_input(struct Cell *ptr_field , struct Constants *info)
 			{
 				break;
 			}
+
 			else
 			{
 				place_y = place_y + 1;
@@ -117,13 +118,13 @@ void read_input(struct Cell *ptr_field , struct Constants *info)
 		printf("\n mouse_x : %d \t mouse_y : %d" , place_x  , place_y);
 		if (info->bombs_set == 0 && mouse_x  != 0 && mouse_y != 0)
 		{
-			place_mines(place_x - 1, place_y - 1, ptr_field , *info);
+			place_mines(place_x - 1 , place_y - 1 , ptr_field , *info);
 			printf("hopefully you have updated correctly");
-			mine_checker(ptr_field ,place_x - 1, place_y - 1 , *info);
+			mine_checker(ptr_field ,place_x - 1 , place_y - 1 , info->no_horizontal_cels , info->no_vertical_cels );    //for debugging purposes struct hasn't been used 
 			info->bombs_set = 1;
-			break;
 		}
-	
+		break;
+
 	}
 
 }
@@ -133,13 +134,14 @@ void draw_window(struct Cell *ptr_field , struct Constants *info)
 
 	SDL_RenderClear(renderer);
 	int x_pos , y_pos;
-	for (int i=0; i < info->no_vertical_cels; i++)
+	for (int i=0; i < info->no_vertical_cels ; i++)
 	{
-		for (int j=0; j < info->no_horizontal_cels ; j++)
+		for (int j=0; j < info->no_horizontal_cels  ; j++)
 		{
 			x_pos = j * IMAGE_WIDTH;
 			y_pos = i * IMAGE_HEIGHT;
-			char value = *(ptr_field + find(i , j , info->no_vertical_cels))->vissible_value;
+			//char value_2 = *(ptr_field + find(j , i , info->no_vertical_cels))->actual_value;
+			char value = *(ptr_field + find(j , i , info->no_horizontal_cels))->vissible_value;
 			SDL_Rect rectangle = {x_pos , y_pos, IMAGE_WIDTH, IMAGE_HEIGHT };
 
 			switch (value)
@@ -195,7 +197,6 @@ void draw_window(struct Cell *ptr_field , struct Constants *info)
 
 		}
 	}
-
 	 SDL_RenderPresent(renderer);
 }
 
@@ -413,7 +414,7 @@ int main(int argc, char *argv[])
 			field_info->no_Bombs = AMOUNT_OF_BOMBS;
 			field_info->bombs_set = 0;
 			struct Cell *field;
-			field = (struct Cell *)malloc((HEIGHT_FIELD * WIDTH_FIELD) * sizeof(struct Cell));
+			field = (struct Cell *)malloc(((HEIGHT_FIELD + 1) * (WIDTH_FIELD + 1)) * sizeof(struct Cell));
 			initialize_gui(field , field_info);
 			while (should_continue) 
 			{
