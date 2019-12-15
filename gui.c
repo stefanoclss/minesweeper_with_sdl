@@ -130,11 +130,34 @@ void read_input(struct Cell *ptr_field , struct Constants *info)
 			mine_checker(ptr_field ,place_x , place_y , info->no_horizontal_cels , info->no_vertical_cels );    //for debugging purposes struct hasn't been used 
 			info->bombs_set = 1;
 		}
+		else if (info->continue_game == 0 || info->continue_game == 2)
+		{
+			if(mouse_y > (WINDOW_HEIGHT / 2))
+			{
+				if(mouse_x > (WINDOW_WIDTH / 2))
+				{
+					should_continue = 0; //end game
+				}
+				else 
+				{
+					printf("\n starting new game");
+					print_grid_frontend(ptr_field , info , '0');
+					info->continue_game = 1;
+					info->bombs_set = 0;
+				}
+			}
+			else
+			{
+				printf("\n not clicking on the right place");
+			}
+			
+
+		}
 		else if (event.button.button == SDL_BUTTON_LEFT)
 		{
 			if (*(ptr_field + find(place_x , place_y , info->no_horizontal_cels))->actual_value == 'B')
 			{
-				printf("\n we still have to implement this, but you lost anyways");
+				info->continue_game = 0;
 			}
 			else
 			{
@@ -182,45 +205,29 @@ void read_input(struct Cell *ptr_field , struct Constants *info)
 	}
 
 }
-void new_game()
+void new_game(int action)
 {
+	printf("\n do you get to here?");
 	SDL_Event event;
+	
 	SDL_RenderClear(renderer);
-	SDL_Rect rectangle_question = {0 , 0, WINDOW_WIDTH , WINDOW_HEIGHT / 2};
-	SDL_Rect yes = {0 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
-	SDL_Rect no = {WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
-	SDL_RenderCopy(renderer, game_over_texture, NULL, &rectangle_question);
-	SDL_RenderCopy(renderer, yes_texture, NULL, &yes);
-	SDL_RenderCopy(renderer, no_texture, NULL, &no);
-	int i = 0;
-	int next_action = 0;
-	while(i == 0)
+	if (action == 0)
 	{
-		if (event.type == SDL_MOUSEBUTTONDOWN)
-		{
-			if((event.button.x > (WINDOW_WIDTH / 2)) && (event.button.y > (WINDOW_WIDTH / 2))) //we clicked on no
-			{
-				next_action = 1;
-				i = 1;
-			}
-			else if((event.button.x < (WINDOW_WIDTH / 2)) && (event.button.y > (WINDOW_WIDTH / 2)))  //we clicked on yes
-			{
-				next_action = 0;
-				i = 1;
-			}
-			else
-			{
-				printf("\n click at the right spot");
-			}
-		}
+		SDL_Rect rectangle_question = {0 , 0, WINDOW_WIDTH , WINDOW_HEIGHT / 2};
+		SDL_Rect yes = {0 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
+		SDL_Rect no = {WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
+		SDL_RenderCopy(renderer, game_over_texture, NULL, &rectangle_question);
+		SDL_RenderCopy(renderer, yes_texture, NULL, &yes);
+		SDL_RenderCopy(renderer, no_texture, NULL, &no);	
 	}
-	if (next_action == 1)
+	else if (action == 2)
 	{
-		should_continue == 0;
-	}
-	else
-	{
-		printf("\n we still need to implement this");
+		SDL_Rect rectangle_question = {0 , 0, WINDOW_WIDTH , WINDOW_HEIGHT / 2};
+		SDL_Rect yes = {0 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
+		SDL_Rect no = {WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
+		SDL_RenderCopy(renderer, you_won_texture, NULL, &rectangle_question);
+		SDL_RenderCopy(renderer, yes_texture, NULL, &yes);
+		SDL_RenderCopy(renderer, no_texture, NULL, &no);	
 	}
 	SDL_RenderPresent(renderer);
 }
@@ -229,77 +236,96 @@ void draw_window(struct Cell *ptr_field , struct Constants *info)
 {
 
 	SDL_RenderClear(renderer);
-	int x_pos , y_pos;
-	for (int i=0; i < info->no_vertical_cels ; i++)
+	if (info->continue_game == 1)
 	{
-		for (int j=0; j < info->no_horizontal_cels  ; j++)
+		int x_pos , y_pos;
+		for (int i=0; i < info->no_vertical_cels ; i++)
 		{
-			x_pos = j * IMAGE_WIDTH;
-			y_pos = i * IMAGE_HEIGHT;
-			//char value_2 = *(ptr_field + find(j , i , info->no_vertical_cels))->actual_value;
-			char value = *(ptr_field + find(j , i , info->no_horizontal_cels))->vissible_value;
-			SDL_Rect rectangle = {x_pos , y_pos, IMAGE_WIDTH, IMAGE_HEIGHT };
-
-			switch (value)
+			for (int j=0; j < info->no_horizontal_cels  ; j++)
 			{
-			case 'q':
-				SDL_RenderCopy(renderer, digit_C_texture, NULL, &rectangle);
-				break;
+				x_pos = j * IMAGE_WIDTH;
+				y_pos = i * IMAGE_HEIGHT;
+				//char value_2 = *(ptr_field + find(j , i , info->no_vertical_cels))->actual_value;
+				char value = *(ptr_field + find(j , i , info->no_horizontal_cels))->vissible_value;
+				SDL_Rect rectangle = {x_pos , y_pos, IMAGE_WIDTH, IMAGE_HEIGHT };
 
-			case '0':
-				SDL_RenderCopy(renderer, digit_0_texture, NULL, &rectangle);
-				break;
+				switch (value)
+				{
+				case 'q':
+					SDL_RenderCopy(renderer, digit_C_texture, NULL, &rectangle);
+					break;
 
-			case '1':
-				SDL_RenderCopy(renderer, digit_1_texture, NULL, &rectangle);
-				break;
+				case '0':
+					SDL_RenderCopy(renderer, digit_0_texture, NULL, &rectangle);
+					break;
 
-			case '2':
-				SDL_RenderCopy(renderer, digit_2_texture, NULL, &rectangle);
-				break;
+				case '1':
+					SDL_RenderCopy(renderer, digit_1_texture, NULL, &rectangle);
+					break;
 
-			case '3':
-				SDL_RenderCopy(renderer, digit_3_texture, NULL, &rectangle);
-				break;
+				case '2':
+					SDL_RenderCopy(renderer, digit_2_texture, NULL, &rectangle);
+					break;
 
-			case '4':
-				SDL_RenderCopy(renderer, digit_4_texture, NULL, &rectangle);
-				break;
+				case '3':
+					SDL_RenderCopy(renderer, digit_3_texture, NULL, &rectangle);
+					break;
 
-			case '5':
-				SDL_RenderCopy(renderer, digit_5_texture, NULL, &rectangle);
-				break;
+				case '4':
+					SDL_RenderCopy(renderer, digit_4_texture, NULL, &rectangle);
+					break;
 
-			case '6':
-				SDL_RenderCopy(renderer, digit_6_texture, NULL, &rectangle);
-				break;
+				case '5':
+					SDL_RenderCopy(renderer, digit_5_texture, NULL, &rectangle);
+					break;
 
-			case '7':
-				SDL_RenderCopy(renderer, digit_7_texture, NULL, &rectangle);
-				break;
+				case '6':
+					SDL_RenderCopy(renderer, digit_6_texture, NULL, &rectangle);
+					break;
 
-			case '8':
-				SDL_RenderCopy(renderer, digit_8_texture, NULL, &rectangle);
-				break;
+				case '7':
+					SDL_RenderCopy(renderer, digit_7_texture, NULL, &rectangle);
+					break;
 
-			case 'F':
-				SDL_RenderCopy(renderer, digit_F_texture, NULL, &rectangle);
-				break;
-			
-			default:
-				printf("\n hidden value %c" , *(ptr_field + find(j , i , info->no_vertical_cels))->vissible_value);
-				break;
+				case '8':
+					SDL_RenderCopy(renderer, digit_8_texture, NULL, &rectangle);
+					break;
+
+				case 'F':
+					SDL_RenderCopy(renderer, digit_F_texture, NULL, &rectangle);
+					break;
+				
+				default:
+					printf("\n hidden value %c" , *(ptr_field + find(j , i , info->no_vertical_cels))->vissible_value);
+					break;
+				}
+
 			}
-
 		}
+		SDL_RenderPresent(renderer);
 	}
-	 SDL_RenderPresent(renderer);
+	else if (info->continue_game == 0) //you lost
+	{
+		new_game(0);
+	}
+	else if (info->continue_game == 2)
+	{
+		new_game(2);
+	}
+	else
+	{
+		printf("\n weird things have happend this shouldn't occur");
+	}
+	
 }
-
-// void check_endgame(struct Cell *ptr_field , struct Constants *info)
-// {
-
-// } 
+void check_win(struct Cell *ptr_field , struct Constants *info)
+{
+	if (el_ctr('q' , ptr_field , 0 , info->no_horizontal_cels , info->no_vertical_cels) == 0 || el_ctr('F', ptr_field, 2 , info->no_horizontal_cels , info->no_vertical_cels) == info->no_Bombs)
+	{
+		info->continue_game = 2;
+	}
+ 
+}
 
 /*
  * Initialiseert het venster en alle extra structuren die nodig zijn om het venster te manipuleren.
@@ -529,14 +555,15 @@ int main(int argc, char *argv[])
 			field_info->no_vertical_cels = HEIGHT_FIELD ;
 			field_info->no_Bombs = AMOUNT_OF_BOMBS;
 			field_info->bombs_set = 0;
+			field_info->continue_game = 1;
 			struct Cell *field;
 			field = (struct Cell *)malloc(((HEIGHT_FIELD + 1) * (WIDTH_FIELD + 1)) * sizeof(struct Cell));
 			initialize_gui(field , field_info);
 			while (should_continue) 
 			{
-				//new_game();
-				 draw_window(field , field_info);
-				 read_input(field , field_info);
+				draw_window(field , field_info);
+				read_input(field , field_info);
+				check_win(field , field_info);
 			} 
 			/* Dealloceer al het geheugen dat werd aangemaakt door SDL zelf. */
 			free_gui();
