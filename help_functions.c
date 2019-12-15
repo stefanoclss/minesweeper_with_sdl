@@ -132,18 +132,13 @@ void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zero
 
 void mine_checker(struct Cell *ptr_field , int move_x, int move_y , int width_field , int height_field)
 {
-	printf("\n note this is in minechecker  actual : %c , \t visible : %c" , *(ptr_field + find(move_x , move_y , width_field))->vissible_value , *(ptr_field + find(move_x , move_y , width_field))->actual_value );
-	printf("\n thuis is the height of the field %d" , height_field);
-	printf("\n this is the width of the field %d" , width_field);
 	if (*(ptr_field + find(move_x , move_y , width_field))->vissible_value == 'q' && !(*(ptr_field + find(move_x , move_y , width_field))->actual_value == 'B'))   //indien we niet weten wat er zich op de positie bevind en dit geen bom is dan
 	{
 		check_suroundings(ptr_field , move_x , move_y , 1 , width_field  , height_field);                           //dan kijken we hoeveel mijnen er rondom het element zitten
-		printf("\nwe got here");
 	}
 	else if(*(ptr_field +  find(move_x , move_y , width_field))->vissible_value == '0')
 	{
 		check_suroundings(ptr_field , move_x , move_y , 0 , width_field , height_field);                           //kijk naar omliggende spots
-		printf("\nwe got here2");
 
 	}
 
@@ -151,39 +146,39 @@ void mine_checker(struct Cell *ptr_field , int move_x, int move_y , int width_fi
 
 
 
-// int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act) //telt het aantal elementen van iets
-// {
-// 	int ctr = 0;
-// 	for (int i = 0 ; i < VERTICAL_CELS; i++)
-// 	{
-// 		for (int j = 0 ; j < HORIZONTAL_CELS; j++)
-// 		{
-// 			if (vis_or_act == 1)          //telt elementen van el en vergelijkt deze met de visuele value
-// 			{
-// 				if (el == *(ptr_field + find(i , j , info.no_vertical_cels))->vissible_value)
-// 				{
-// 					ctr++;
-// 				}
-// 			}
-// 			else if (vis_or_act == 2)     //teller voor te kijken of alle vlaggen op alle bommen staan
-// 			{
-// 				if (el == *(ptr_field + find(i , j , info.no_vertical_cels))->vissible_value && *(ptr_field + find(i , j , info.no_vertical_cels))->actual_value == 'B')
-// 				{
-// 					ctr++;
-// 				}
-// 			}
-// 			else       					//telt elementen van de actuele value
-// 			{
-// 				if (el == *(ptr_field + find(i , j , info.no_vertical_cels))->actual_value)
-// 				{
-// 					ctr++;
-// 				}
-// 			}
+int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act , int columns , int rows ) //telt het aantal elementen van iets
+{
+	int ctr = 0;
+	for (int i = 0 ; i < columns ; i++)
+	{
+		for (int j = 0 ; j < rows ; j++)
+		{
+			if (vis_or_act == 1)          //telt elementen van el en vergelijkt deze met de visuele value
+			{
+				if (el == *(ptr_field + find(i , j , columns))->vissible_value)
+				{
+					ctr++;
+				}
+			}
+			else if (vis_or_act == 2)     //teller voor te kijken of alle vlaggen op alle bommen staan
+			{
+				if (el == *(ptr_field + find(i , j , columns))->vissible_value && *(ptr_field + find(i , j , columns))->actual_value == 'B')
+				{
+					ctr++;
+				}
+			}
+			else       					//telt elementen van de actuele value
+			{
+				if (el == *(ptr_field + find(i , j , columns))->actual_value)
+				{
+					ctr++;
+				}
+			}
 
-// 		}
-// 	}
-// 	return ctr;
-// }
+		}
+	}
+	return ctr;
+}
 
 
 // void make_move(struct Cell *ptr_field)
@@ -219,63 +214,63 @@ void mine_checker(struct Cell *ptr_field , int move_x, int move_y , int width_fi
 // 		char action;
 // 		printf("\n remaining flags %d \n P will show field with bombs, N is for next move and F for a flag. \n choose an action type F , P or R", TOTAL_BOMBS -el_ctr('F' , ptr_field, 1));
 // 		scanf("%c", &action);
-// 		if (action == 'F')                  //vlag zetten
-// 		{
-// 			char   i , j ;
-// 			int x , y ;
-// 			printf("\n choose an x coordinate");
-// 			getchar();                     //newline nemen voor niet te interfereren met volgende getchar
-// 			i = getchar();
-// 			printf("\n choose an y coordinate");
-// 			getchar();
-// 			j = getchar();
-// 			x = i - '0';
-// 			y = j - '0';
-// 			printf("\n x=%d\n" , x);
-// 			printf("\n y=%d\n" , y);
-// 			if (*(ptr_field + find (x , y))->vissible_value == 'F')
-// 			{
-// 				if (*(ptr_field + find (x , y))->actual_value == 'B')    //indien de positie waar men een vlag wilt wegnemen een bom bevat geef q als visual
-// 				{
-// 					*(ptr_field + find (x , y))->vissible_value = 'q';
-// 					print_grid(ptr_field , 0);
-// 					make_move(ptr_field);
-// 				}
-// 				else if (*(ptr_field + find (x , y))->actual_value == 'q')     //indien het actuele q is (kon met or met vorige if)
-// 				{
-// 					*(ptr_field + find (x , y))->vissible_value = 'q';
-// 					print_grid(ptr_field , 0);
-// 					make_move(ptr_field);
-// 				}
-// 				else if (*(ptr_field + find (x , y))->actual_value == ' ')   //zet een nul als er geen bommen zich rondom bevinden
-// 				{
-// 					*(ptr_field + find (x , y))->vissible_value = '0';
-// 					print_grid(ptr_field , 0);
+		// if (action == 'F')                  //vlag zetten
+		// {
+		// 	char   i , j ;
+		// 	int x , y ;
+		// 	printf("\n choose an x coordinate");
+		// 	getchar();                     //newline nemen voor niet te interfereren met volgende getchar
+		// 	i = getchar();
+		// 	printf("\n choose an y coordinate");
+		// 	getchar();
+		// 	j = getchar();
+		// 	x = i - '0';
+		// 	y = j - '0';
+		// 	printf("\n x=%d\n" , x);
+		// 	printf("\n y=%d\n" , y);
+		// 	if (*(ptr_field + find (x , y))->vissible_value == 'F')
+		// 	{
+		// 		if (*(ptr_field + find (x , y))->actual_value == 'B')    //indien de positie waar men een vlag wilt wegnemen een bom bevat geef q als visual
+		// 		{
+		// 			*(ptr_field + find (x , y))->vissible_value = 'q';
+		// 			print_grid(ptr_field , 0);
+		// 			make_move(ptr_field);
+		// 		}
+		// 		else if (*(ptr_field + find (x , y))->actual_value == 'q')     //indien het actuele q is (kon met or met vorige if)
+		// 		{
+		// 			*(ptr_field + find (x , y))->vissible_value = 'q';
+		// 			print_grid(ptr_field , 0);
+		// 			make_move(ptr_field);
+		// 		}
+		// 		else if (*(ptr_field + find (x , y))->actual_value == ' ')   //zet een nul als er geen bommen zich rondom bevinden
+		// 		{
+		// 			*(ptr_field + find (x , y))->vissible_value = '0';
+		// 			print_grid(ptr_field , 0);
 
-// 					make_move(ptr_field);
-// 				}
-// 				else														//anders vervang je visueel gwn door de actuele waarde
-// 				{
-// 					*(ptr_field + find (x , y))->vissible_value = *(ptr_field + find (x , y))->actual_value;
-// 					mine_checker(ptr_field , x, y);
-// 					print_grid(ptr_field , 0);
-// 					make_move(ptr_field);
-// 				}
+		// 			make_move(ptr_field);
+		// 		}
+		// 		else														//anders vervang je visueel gwn door de actuele waarde
+		// 		{
+		// 			*(ptr_field + find (x , y))->vissible_value = *(ptr_field + find (x , y))->actual_value;
+		// 			mine_checker(ptr_field , x, y);
+		// 			print_grid(ptr_field , 0);
+		// 			make_move(ptr_field);
+		// 		}
 
-// 			}
-// 			else if (el_ctr('F' , ptr_field, 1) > TOTAL_BOMBS)           //buitenste tak als alle vlaggen zijn gezet verwijder een vlag
-// 			{
-// 				printf("\n please remove a flag all flags are set, not all of them pinpoint bombs \n");
-// 				make_move(ptr_field);
-// 			}
-// 			else														//anders zet je gwn een vlag op het vlakje
-// 			{
-// 				*(ptr_field + find(x , y))->vissible_value = 'F';
-// 				print_grid(ptr_field , 0);
-// 				make_move(ptr_field);
-// 			}
+		// 	}
+		// 	else if (el_ctr('F' , ptr_field, 1) > TOTAL_BOMBS)           //buitenste tak als alle vlaggen zijn gezet verwijder een vlag
+		// 	{
+		// 		printf("\n please remove a flag all flags are set, not all of them pinpoint bombs \n");
+		// 		make_move(ptr_field);
+		// 	}
+		// 	else														//anders zet je gwn een vlag op het vlakje
+		// 	{
+		// 		*(ptr_field + find(x , y))->vissible_value = 'F';
+		// 		print_grid(ptr_field , 0);
+		// 		make_move(ptr_field);
+		// 	}
 
-// 		}
+		// }
 
 // 		if (action == 'P')                                         //print het vlak (6896 voor in de else tak te vallen)
 // 		{
