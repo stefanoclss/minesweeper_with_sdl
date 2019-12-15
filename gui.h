@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <unistd.h> 
+#include <fcntl.h> 
+#include <string.h>
 
 /*
  * Importeer de benodigde functies uit SDL2.
@@ -16,7 +18,9 @@
  */
 #define WINDOW_HEIGHT 500
 #define WINDOW_WIDTH 600
-
+#define MAX_EL_HOR 12
+#define MAX_EL_VER 10
+#define MAX_ARR_FIELD 256
 /*
  * De hoogte en breedte (in pixels) van de afbeeldingen voor de vakjes in het speelveld die getoond worden.
  * Als je andere afbeelding wil gebruiken in je GUI, zorg er dan voor dat deze
