@@ -464,13 +464,86 @@ void initialize_gui(struct Cell *ptr_field , struct Constants *info)
 	print_grid_frontend(ptr_field , info , '0');
 }
 
+void make_txt_file(struct Cell *ptr_field , struct Constants *info) //ref 4
+{
+	/* Variable to store user content */
+    char data[info->no_vertical_cels * info->no_horizontal_cels * 2];
+    /* File pointer to hold reference to our file */
+    FILE * fPtr;
+    /* 
+     * Open file in w (write) mode. 
+     * "data/file1.txt" is complete path to create file
+     */
+    fPtr = fopen("saves/save_game.txt", "w");
+    /* fopen() return NULL if last operation was unsuccessful */
+    if(fPtr == NULL)
+    {
+        /* File not created hence exit */
+        printf("Unable to create file.\n");
+        exit(EXIT_FAILURE);
+    }
+	for (int i=0; i < info->no_vertical_cels; i++)
+	{
+		fprintf(fPtr,"\n");
+		for (int j=0; j < info->no_horizontal_cels ; j++)
+		{
+			char visual_input = *(ptr_field + find(j, i , info->no_horizontal_cels))->vissible_value;
+			fputc(visual_input , fPtr);
+			char actual_input = *(ptr_field + find(j, i , info->no_horizontal_cels))->vissible_value;
+			if (actual_input == ' ')
+			{
+				actual_input = 'k';    //dummy value
+				fputc(actual_input , fPtr);
+			}
+			else
+			{
+				fputc(actual_input , fPtr);
+			}
+		}
+	}
+    /* Close file to save file data */
+    fclose(fPtr);
+    printf("File created and saved successfully. :) \n");
+}
+
+
+
+
 int main(int argc, char *argv[]) 
 {
+	printf("\n these are the amount of paramters %d" , argc);
 	srand(time(NULL));  
 	if( argc == 0 ) 
 	{
       printf("No arguments given which were expected.\n");
    	}
+	else if (argc = 2) 
+    {
+		FILE * fPtr;
+		fPtr = fopen("saves/save_game.txt", "w");
+		/* fopen() return NULL if last operation was unsuccessful */
+		if(fPtr == NULL)
+		{
+			/* File not created hence exit */
+			printf("Unable to create file.\n");
+			exit(EXIT_FAILURE);
+		}
+
+		char buffer[MAX_ARR_FIELD];
+		for (int i = 0; i < MAX_EL_VER + 1; i++)
+		{
+			if (fgets(buffer, MAX_EL_VER , fPtr) != NULL)
+			{
+				printf("%s" , buffer);
+			}
+			else
+			{
+				break;
+			}
+			
+		}
+		fclose(fPtr); 
+    }
 
    else if( argc = 6 ) 
    {
@@ -564,6 +637,7 @@ int main(int argc, char *argv[])
 				draw_window(field , field_info);
 				read_input(field , field_info);
 				check_win(field , field_info);
+				make_txt_file(field , field_info);
 			} 
 			/* Dealloceer al het geheugen dat werd aangemaakt door SDL zelf. */
 			free_gui();
@@ -573,10 +647,6 @@ int main(int argc, char *argv[])
 		}
 		
 
-   }
-   else if (argc = 2) 
-   {
-      printf("game starting.\n");
    }
    else 
    {
@@ -644,4 +714,5 @@ int string_length(char *given_string) //mentioned in references 3)
     Created by Elisa Gonzalez Boix on 08/11/16.
     Copyright © 2016 Elisa Gonzalez Boix. All rights reserved. (used in main of gui)
 3) https://www.geeksforgeeks.org/length-string-using-pointers/ (used above)
+4) https://codeforwin.org/2018/01/c-program-create-file-write-contents.html
  */
