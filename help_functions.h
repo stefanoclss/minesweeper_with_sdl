@@ -6,6 +6,10 @@
 #include <stddef.h>
 #include <SDL2/SDL.h>
 static SDL_Renderer *renderer;
+static SDL_Texture *game_over_texture;
+static SDL_Texture *you_won_texture;
+static SDL_Texture *yes_texture;
+static SDL_Texture *no_texture;
 static SDL_Texture *digit_0_texture;
 static SDL_Texture *digit_1_texture;
 static SDL_Texture *digit_2_texture;
@@ -35,7 +39,7 @@ void check_suroundings(struct Cell *ptr_field ,int x0,int y0 , int bombs_or_zero
 void mine_checker(struct Cell *ptr_field , int move_x, int move_y , int width_field , int height_field);
 void print_grid_frontend(struct Cell *ptr_field , struct Constants *info , char action);
 int find(int move_x ,int move_y , int vertical_cels);
-int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act);
+int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act , int columns , int rows );
 void make_move(struct Cell *ptr_field);
 void print_grid(struct Cell *ptr_field , int actual) ;
 void place_mines(int first_move_x, int first_move_y, struct Cell *ptr_field , struct Constants info);
