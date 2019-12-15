@@ -26,6 +26,11 @@ static SDL_Texture *digit_8_texture;
 static SDL_Texture *digit_C_texture;
 static SDL_Texture *digit_F_texture;
 static SDL_Texture *digit_B_texture;
+static SDL_Texture *game_over_texture;
+static SDL_Texture *you_won_texture;
+static SDL_Texture *yes_texture;
+static SDL_Texture *no_texture;
+
 
 
 /*
@@ -91,7 +96,7 @@ void read_input(struct Cell *ptr_field , struct Constants *info)
 		mouse_y = event.button.y;
 		int place_x = 0;
 		int place_y = 0;
-		for (int i = 0 ; i < info->no_horizontal_cels ; i++)
+		for (int i = 0 ; i < info->no_horizontal_cels  ; i++)
 		{
 			if (i * IMAGE_WIDTH > mouse_x)
 			{
@@ -114,19 +119,110 @@ void read_input(struct Cell *ptr_field , struct Constants *info)
 				place_y = place_y + 1;
 			}
 		}
+		place_x = place_x - 1;
+		place_y = place_y - 1;
 		//printf("\n this is the bombset %d" , info->bombs_set);
 		printf("\n mouse_x : %d \t mouse_y : %d" , place_x  , place_y);
-		if (info->bombs_set == 0 && mouse_x  != 0 && mouse_y != 0)
+		if (info->bombs_set == 0 && mouse_x  != 0 && mouse_y != 0) //doesn't matter if you clicked left or right, bombs arent set yet!
 		{
-			place_mines(place_x - 1 , place_y - 1 , ptr_field , *info);
+			place_mines(place_x, place_y , ptr_field , *info);
 			printf("hopefully you have updated correctly");
-			mine_checker(ptr_field ,place_x - 1 , place_y - 1 , info->no_horizontal_cels , info->no_vertical_cels );    //for debugging purposes struct hasn't been used 
+			mine_checker(ptr_field ,place_x , place_y , info->no_horizontal_cels , info->no_vertical_cels );    //for debugging purposes struct hasn't been used 
 			info->bombs_set = 1;
+		}
+		else if (event.button.button == SDL_BUTTON_LEFT)
+		{
+			if (*(ptr_field + find(place_x , place_y , info->no_horizontal_cels))->actual_value == 'B')
+			{
+				printf("\n we still have to implement this, but you lost anyways");
+			}
+			else
+			{
+				mine_checker(ptr_field ,place_x , place_y , info->no_horizontal_cels , info->no_vertical_cels );
+			}
+			
+		}
+		else if (event.button.button == SDL_BUTTON_RIGHT)
+		{
+			int x = place_x;
+			int y = place_y; //note make a function of all written beneath (we define x and y because the original code used this)
+			printf("\n am i clicking right?");
+			if (*(ptr_field + find (x , y, info->no_horizontal_cels))->vissible_value == 'F')
+				{
+					if (*(ptr_field + find (x , y, info->no_horizontal_cels))->actual_value == 'B')    //indien de positie waar men een vlag wilt wegnemen een bom bevat geef q als visual
+					{
+						*(ptr_field + find (x , y, info->no_horizontal_cels))->vissible_value = 'q';
+					}
+					else if (*(ptr_field + find (x , y, info->no_horizontal_cels))->actual_value == 'q')     //indien het actuele q is (kon met or met vorige if)
+					{
+						*(ptr_field + find (x , y, info->no_horizontal_cels))->vissible_value = 'q';
+					}
+					else if (*(ptr_field + find (x , y, info->no_horizontal_cels))->actual_value == ' ')   //zet een nul als er geen bommen zich rondom bevinden
+					{
+						*(ptr_field + find (x , y , info->no_horizontal_cels))->vissible_value = '0';
+					}
+					else														//anders vervang je visueel gwn door de actuele waarde
+					{
+						*(ptr_field + find (x , y, info->no_horizontal_cels))->vissible_value = *(ptr_field + find (x , y , info->no_horizontal_cels))->actual_value;
+						mine_checker(ptr_field , x, y , info->no_horizontal_cels , info->no_vertical_cels);
+					}
+
+				}
+			else if (el_ctr('F' , ptr_field, 1 , info->no_horizontal_cels , info->no_vertical_cels) >= info->no_Bombs)           //buitenste tak als alle vlaggen zijn gezet verwijder een vlag
+			{
+				printf("\n please remove a flag all flags are set, not all of them pinpoint bombs \n"); //hier is een visuele functie nodig
+			}
+			else														//anders zet je gwn een vlag op het vlakje
+			{
+				*(ptr_field + find(x , y , info->no_horizontal_cels))->vissible_value = 'F';
+			}
 		}
 		break;
 
 	}
 
+}
+void new_game()
+{
+	SDL_Event event;
+	SDL_RenderClear(renderer);
+	SDL_Rect rectangle_question = {0 , 0, WINDOW_WIDTH , WINDOW_HEIGHT / 2};
+	SDL_Rect yes = {0 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
+	SDL_Rect no = {WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2 , WINDOW_WIDTH / 2 , WINDOW_HEIGHT / 2};
+	SDL_RenderCopy(renderer, game_over_texture, NULL, &rectangle_question);
+	SDL_RenderCopy(renderer, yes_texture, NULL, &yes);
+	SDL_RenderCopy(renderer, no_texture, NULL, &no);
+	int i = 0;
+	int next_action = 0;
+	while(i == 0)
+	{
+		if (event.type == SDL_MOUSEBUTTONDOWN)
+		{
+			if((event.button.x > (WINDOW_WIDTH / 2)) && (event.button.y > (WINDOW_WIDTH / 2))) //we clicked on no
+			{
+				next_action = 1;
+				i = 1;
+			}
+			else if((event.button.x < (WINDOW_WIDTH / 2)) && (event.button.y > (WINDOW_WIDTH / 2)))  //we clicked on yes
+			{
+				next_action = 0;
+				i = 1;
+			}
+			else
+			{
+				printf("\n click at the right spot");
+			}
+		}
+	}
+	if (next_action == 1)
+	{
+		should_continue == 0;
+	}
+	else
+	{
+		printf("\n we still need to implement this");
+	}
+	SDL_RenderPresent(renderer);
 }
 
 void draw_window(struct Cell *ptr_field , struct Constants *info) 
@@ -200,6 +296,11 @@ void draw_window(struct Cell *ptr_field , struct Constants *info)
 	 SDL_RenderPresent(renderer);
 }
 
+// void check_endgame(struct Cell *ptr_field , struct Constants *info)
+// {
+
+// } 
+
 /*
  * Initialiseert het venster en alle extra structuren die nodig zijn om het venster te manipuleren.
  */
@@ -243,7 +344,6 @@ int is_relevant_event(SDL_Event *event)
 void free_gui() 
 {
 	/* Dealloceert de SDL_Textures die werden aangemaakt. */ //use fopen  for this stuff
-
 	SDL_DestroyTexture(digit_F_texture);
 	SDL_DestroyTexture(digit_C_texture);
 	SDL_DestroyTexture(digit_B_texture);
@@ -256,6 +356,10 @@ void free_gui()
 	SDL_DestroyTexture(digit_6_texture);
 	SDL_DestroyTexture(digit_7_texture);
 	SDL_DestroyTexture(digit_8_texture);
+	SDL_DestroyTexture(game_over_texture);
+	SDL_DestroyTexture(you_won_texture);
+	SDL_DestroyTexture(yes_texture);
+	SDL_DestroyTexture(no_texture);
 	/* Dealloceert het venster. */
 	SDL_DestroyWindow(window);
 	/* Dealloceert de renderer. */
@@ -272,6 +376,10 @@ void free_gui()
 
 void initialize_textures() 
 {
+	SDL_Surface* game_over_texture_path = SDL_LoadBMP("Images/game_over.bmp");
+	SDL_Surface* you_won_texture_path = SDL_LoadBMP("Images/you_won.bmp");
+	SDL_Surface* yes_texture_path = SDL_LoadBMP("Images/yes.bmp");
+	SDL_Surface* no_texture_path = SDL_LoadBMP("Images/no.bmp");
 	SDL_Surface* digit_1_texture_path = SDL_LoadBMP("Images/1.bmp");
 	SDL_Surface* digit_0_texture_path = SDL_LoadBMP("Images/0.bmp");
 	SDL_Surface* digit_2_texture_path = SDL_LoadBMP("Images/2.bmp");
@@ -284,6 +392,10 @@ void initialize_textures()
 	SDL_Surface* digit_F_texture_path = SDL_LoadBMP("Images/flagged.bmp");
 	SDL_Surface* digit_C_texture_path = SDL_LoadBMP("Images/covered.bmp");
 	SDL_Surface* digit_B_texture_path = SDL_LoadBMP("Images/BOMB.bmp");
+	game_over_texture = SDL_CreateTextureFromSurface(renderer, game_over_texture_path);
+	you_won_texture = SDL_CreateTextureFromSurface(renderer, you_won_texture_path);
+	yes_texture = SDL_CreateTextureFromSurface(renderer, yes_texture_path);
+	no_texture = SDL_CreateTextureFromSurface(renderer, no_texture_path);
 	digit_C_texture = SDL_CreateTextureFromSurface(renderer, digit_C_texture_path);
 	digit_B_texture = SDL_CreateTextureFromSurface(renderer, digit_B_texture_path);
 	digit_F_texture = SDL_CreateTextureFromSurface(renderer, digit_F_texture_path);
@@ -296,6 +408,10 @@ void initialize_textures()
 	digit_6_texture = SDL_CreateTextureFromSurface(renderer, digit_6_texture_path);
 	digit_7_texture = SDL_CreateTextureFromSurface(renderer, digit_7_texture_path);
 	digit_8_texture = SDL_CreateTextureFromSurface(renderer, digit_8_texture_path);
+	SDL_FreeSurface(game_over_texture_path);
+	SDL_FreeSurface(you_won_texture_path);
+	SDL_FreeSurface(yes_texture_path);
+	SDL_FreeSurface(no_texture_path);
 	SDL_FreeSurface(digit_B_texture_path);
 	SDL_FreeSurface(digit_C_texture_path);
 	SDL_FreeSurface(digit_F_texture_path);
@@ -418,6 +534,7 @@ int main(int argc, char *argv[])
 			initialize_gui(field , field_info);
 			while (should_continue) 
 			{
+				//new_game();
 				 draw_window(field , field_info);
 				 read_input(field , field_info);
 			} 
