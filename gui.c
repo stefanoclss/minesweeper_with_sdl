@@ -524,13 +524,13 @@ int main(int argc, char *argv[])
 		should_continue = 0;
       	printf("No arguments given which were expected.\n");
    	}
-	else if (argc == 3) //https://stackoverflow.com/questions/3501338/c-read-file-line-by-line
+	else if (argc == 3) //./main -f ../fase_2/saves/save_game.txt     this is how you open saved games
     {
 		FILE * fPtr;
 		char * line = NULL;
     	size_t len = 0;
     	ssize_t read;
-		fPtr = fopen(argv[1], "r");
+		fPtr = fopen(argv[2], "r");
 		/* fopen() return NULL if last operation was unsuccessful */
 		if(fPtr == NULL)
 		{
@@ -558,7 +558,7 @@ int main(int argc, char *argv[])
 			
 		}
 		char c;
-		fPtr = fopen(argv[1], "r");
+		fPtr = fopen(argv[2], "r");
 		for (c = getc(fPtr); c != EOF; c = getc(fPtr))
 		{
 			if (c == 'B')
