@@ -16,11 +16,11 @@
  * De hoogte en breedte van het venster (in pixels).
  * Deze dimensies zijn arbitrair gekozen. Deze dimensies hangen mogelijk af van de grootte van het speelveld.
  */
-#define WINDOW_HEIGHT 500
-#define WINDOW_WIDTH 600
+#define WINDOW_HEIGHT 1000
+#define WINDOW_WIDTH 1200
 #define MAX_EL_HOR 12
-#define MAX_EL_VER 10
-#define MAX_ARR_FIELD 256
+#define MAX_EL_VER 30
+#define MAX_ARR_FIELD 100000
 /*
  * De hoogte en breedte (in pixels) van de afbeeldingen voor de vakjes in het speelveld die getoond worden.
  * Als je andere afbeelding wil gebruiken in je GUI, zorg er dan voor dat deze
