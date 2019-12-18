@@ -376,11 +376,12 @@ int el_ctr(char el , struct Cell *ptr_field ,int vis_or_act , int columns , int 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////										FRONTEND FUNCTIONS																	///////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void print_grid_frontend(struct Cell *ptr_field , struct Constants *info , char action)
+void print_grid_frontend(struct Cell *ptr_field , struct Constants *info , char action) //also used for saving stuff
 {
 
 	for (int i=0; i < info->no_vertical_cels; i++)
 	{
+		printf("\n");
 		for (int j=0; j < info->no_horizontal_cels ; j++)
 		{
 			int horizontal_cels = info->no_horizontal_cels;
@@ -391,8 +392,9 @@ void print_grid_frontend(struct Cell *ptr_field , struct Constants *info , char 
 				*(ptr_field + find(j, i , horizontal_cels))->vissible_value = 'q';				//generate new_field
 				*(ptr_field + find(j, i , horizontal_cels))->actual_value = 'q';
 				break;
-			case '1':  //making of normal grid
-				//printf("%c" , *(ptr_field + find(i, j , vertical_cels))->vissible_value);
+			case '1':  //making of normal grid //only for debugging now
+				printf("%c" , *(ptr_field + find(j, i , horizontal_cels))->vissible_value);
+				//printf("%c" , *(ptr_field + find(j, i , horizontal_cels))->actual_value);
 				break;
 
 			case '2':  //making of cheat grid
